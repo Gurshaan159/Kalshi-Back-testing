@@ -10,7 +10,6 @@ add_executable(kalshi_backtest
   src/cli.cpp
   src/csv_reader.cpp
   src/engine.cpp
-  src/engine_v2.cpp
   src/kalshi_fetch.cpp
 )
 

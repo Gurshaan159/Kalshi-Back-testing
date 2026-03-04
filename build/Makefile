@@ -223,54 +223,6 @@ src/engine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine.cpp.s
 .PHONY : src/engine.cpp.s
 
-src/engine_v2.obj: src/engine_v2.cpp.obj
-.PHONY : src/engine_v2.obj
-
-# target to build an object file
-src/engine_v2.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj
-.PHONY : src/engine_v2.cpp.obj
-
-src/engine_v2.i: src/engine_v2.cpp.i
-.PHONY : src/engine_v2.i
-
-# target to preprocess a source file
-src/engine_v2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.i
-.PHONY : src/engine_v2.cpp.i
-
-src/engine_v2.s: src/engine_v2.cpp.s
-.PHONY : src/engine_v2.s
-
-# target to generate assembly for a file
-src/engine_v2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.s
-.PHONY : src/engine_v2.cpp.s
-
-src/engine_v3.obj: src/engine_v3.cpp.obj
-.PHONY : src/engine_v3.obj
-
-# target to build an object file
-src/engine_v3.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj
-.PHONY : src/engine_v3.cpp.obj
-
-src/engine_v3.i: src/engine_v3.cpp.i
-.PHONY : src/engine_v3.i
-
-# target to preprocess a source file
-src/engine_v3.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.i
-.PHONY : src/engine_v3.cpp.i
-
-src/engine_v3.s: src/engine_v3.cpp.s
-.PHONY : src/engine_v3.s
-
-# target to generate assembly for a file
-src/engine_v3.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\kalshi_backtest.dir\build.make CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.s
-.PHONY : src/engine_v3.cpp.s
-
 src/kalshi_fetch.obj: src/kalshi_fetch.cpp.obj
 .PHONY : src/kalshi_fetch.obj
 
@@ -459,12 +411,6 @@ help:
 	@echo ... src/engine.obj
 	@echo ... src/engine.i
 	@echo ... src/engine.s
-	@echo ... src/engine_v2.obj
-	@echo ... src/engine_v2.i
-	@echo ... src/engine_v2.s
-	@echo ... src/engine_v3.obj
-	@echo ... src/engine_v3.i
-	@echo ... src/engine_v3.s
 	@echo ... src/kalshi_fetch.obj
 	@echo ... src/kalshi_fetch.i
 	@echo ... src/kalshi_fetch.s

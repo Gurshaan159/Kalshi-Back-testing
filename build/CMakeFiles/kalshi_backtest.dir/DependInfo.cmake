@@ -11,8 +11,6 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/thukr/Kalshi-Back-testing/src/cli.cpp" "CMakeFiles/kalshi_backtest.dir/src/cli.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/cli.cpp.obj.d"
   "C:/Users/thukr/Kalshi-Back-testing/src/csv_reader.cpp" "CMakeFiles/kalshi_backtest.dir/src/csv_reader.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/csv_reader.cpp.obj.d"
   "C:/Users/thukr/Kalshi-Back-testing/src/engine.cpp" "CMakeFiles/kalshi_backtest.dir/src/engine.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/engine.cpp.obj.d"
-  "C:/Users/thukr/Kalshi-Back-testing/src/engine_v2.cpp" "CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj.d"
-  "C:/Users/thukr/Kalshi-Back-testing/src/engine_v3.cpp" "CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj.d"
   "C:/Users/thukr/Kalshi-Back-testing/src/kalshi_fetch.cpp" "CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj.d"
   "C:/Users/thukr/Kalshi-Back-testing/src/main.cpp" "CMakeFiles/kalshi_backtest.dir/src/main.cpp.obj" "gcc" "CMakeFiles/kalshi_backtest.dir/src/main.cpp.obj.d"
   )

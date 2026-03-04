@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct TradeRecord {
@@ -19,15 +20,16 @@ struct FillResult {
 
 class Portfolio {
  public:
-  explicit Portfolio(double initial_cash)
-      : initial_cash_(initial_cash), cash_(initial_cash) {}
+  explicit Portfolio(double initial_cash, bool keep_trade_history = true)
+      : initial_cash_(initial_cash), cash_(initial_cash), keep_trade_history_(keep_trade_history) {}
 
   FillResult ApplyFill(const std::string& timestamp,
                        const std::string& action,
                        int qty_signed,
                        double market_price,
                        double fee_per_contract,
-                       double slippage_points) {
+                      double slippage_points,
+                      TradeRecord* out_trade = nullptr) {
     FillResult result;
     if (qty_signed == 0) {
       return result;
@@ -78,7 +80,13 @@ class Portfolio {
       }
     }
 
-    trades_.push_back(TradeRecord{timestamp, action, qty_signed, fill_price, result.realized_delta});
+    TradeRecord rec{timestamp, action, qty_signed, fill_price, result.realized_delta};
+    if (out_trade != nullptr) {
+      *out_trade = rec;
+    }
+    if (keep_trade_history_) {
+      trades_.push_back(std::move(rec));
+    }
     return result;
   }
 
@@ -113,5 +121,6 @@ class Portfolio {
   int position_qty_{0};
   double avg_entry_price_{0.0};
   double realized_pnl_{0.0};
+  bool keep_trade_history_{true};
   std::vector<TradeRecord> trades_;
 };

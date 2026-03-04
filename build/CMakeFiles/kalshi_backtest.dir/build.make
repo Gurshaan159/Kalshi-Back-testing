@@ -131,41 +131,11 @@ CMakeFiles/kalshi_backtest.dir/src/engine.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kalshi_backtest.dir/src/engine.cpp.s"
 	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thukr\Kalshi-Back-testing\src\engine.cpp -o CMakeFiles\kalshi_backtest.dir\src\engine.cpp.s
 
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj: CMakeFiles/kalshi_backtest.dir/flags.make
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj: CMakeFiles/kalshi_backtest.dir/includes_CXX.rsp
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj: C:/Users/thukr/Kalshi-Back-testing/src/engine_v2.cpp
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj: CMakeFiles/kalshi_backtest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj -MF CMakeFiles\kalshi_backtest.dir\src\engine_v2.cpp.obj.d -o CMakeFiles\kalshi_backtest.dir\src\engine_v2.cpp.obj -c C:\Users\thukr\Kalshi-Back-testing\src\engine_v2.cpp
-
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.i"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thukr\Kalshi-Back-testing\src\engine_v2.cpp > CMakeFiles\kalshi_backtest.dir\src\engine_v2.cpp.i
-
-CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.s"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thukr\Kalshi-Back-testing\src\engine_v2.cpp -o CMakeFiles\kalshi_backtest.dir\src\engine_v2.cpp.s
-
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj: CMakeFiles/kalshi_backtest.dir/flags.make
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj: CMakeFiles/kalshi_backtest.dir/includes_CXX.rsp
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj: C:/Users/thukr/Kalshi-Back-testing/src/engine_v3.cpp
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj: CMakeFiles/kalshi_backtest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj -MF CMakeFiles\kalshi_backtest.dir\src\engine_v3.cpp.obj.d -o CMakeFiles\kalshi_backtest.dir\src\engine_v3.cpp.obj -c C:\Users\thukr\Kalshi-Back-testing\src\engine_v3.cpp
-
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.i"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thukr\Kalshi-Back-testing\src\engine_v3.cpp > CMakeFiles\kalshi_backtest.dir\src\engine_v3.cpp.i
-
-CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.s"
-	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thukr\Kalshi-Back-testing\src\engine_v3.cpp -o CMakeFiles\kalshi_backtest.dir\src\engine_v3.cpp.s
-
 CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj: CMakeFiles/kalshi_backtest.dir/flags.make
 CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj: CMakeFiles/kalshi_backtest.dir/includes_CXX.rsp
 CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj: C:/Users/thukr/Kalshi-Back-testing/src/kalshi_fetch.cpp
 CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj: CMakeFiles/kalshi_backtest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj"
 	C:\Users\thukr\AppData\Local\Microsoft\WinGet\Packages\MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\llvm-mingw-20260224-ucrt-x86_64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj -MF CMakeFiles\kalshi_backtest.dir\src\kalshi_fetch.cpp.obj.d -o CMakeFiles\kalshi_backtest.dir\src\kalshi_fetch.cpp.obj -c C:\Users\thukr\Kalshi-Back-testing\src\kalshi_fetch.cpp
 
 CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.i: cmake_force
@@ -182,8 +152,6 @@ kalshi_backtest_OBJECTS = \
 "CMakeFiles/kalshi_backtest.dir/src/cli.cpp.obj" \
 "CMakeFiles/kalshi_backtest.dir/src/csv_reader.cpp.obj" \
 "CMakeFiles/kalshi_backtest.dir/src/engine.cpp.obj" \
-"CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj" \
-"CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj" \
 "CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj"
 
 # External object files for target kalshi_backtest
@@ -193,14 +161,12 @@ kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/main.cpp.obj
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/cli.cpp.obj
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/csv_reader.cpp.obj
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/engine.cpp.obj
-kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/engine_v2.cpp.obj
-kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/engine_v3.cpp.obj
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/src/kalshi_fetch.cpp.obj
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/build.make
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/linkLibs.rsp
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/objects1.rsp
 kalshi_backtest.exe: CMakeFiles/kalshi_backtest.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable kalshi_backtest.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\thukr\Kalshi-Back-testing\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable kalshi_backtest.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\kalshi_backtest.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

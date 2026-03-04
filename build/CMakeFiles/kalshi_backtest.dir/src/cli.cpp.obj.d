@@ -572,8 +572,6 @@ CMakeFiles/kalshi_backtest.dir/src/cli.cpp.obj: \
   C:/Users/thukr/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260224-ucrt-x86_64/include/c++/v1/optional \
   C:/Users/thukr/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260224-ucrt-x86_64/include/c++/v1/__format/range_format.h \
   C:/Users/thukr/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260224-ucrt-x86_64/include/c++/v1/__format/fmt_pair_like.h \
-  C:/Users/thukr/Kalshi-Back-testing/include/engine_v2.hpp \
-  C:/Users/thukr/Kalshi-Back-testing/include/engine_v3.hpp \
   C:/Users/thukr/Kalshi-Back-testing/include/kalshi_fetch.hpp \
   C:/Users/thukr/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260224-ucrt-x86_64/include/c++/v1/iostream \
   C:/Users/thukr/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260224-ucrt-x86_64/include/c++/v1/ios \

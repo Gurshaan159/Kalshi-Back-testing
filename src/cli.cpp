@@ -1,7 +1,6 @@
 #include "cli.hpp"
 
 #include "engine.hpp"
-#include "engine_v2.hpp"
 #include "kalshi_fetch.hpp"
 
 #include <cstdlib>
@@ -22,7 +21,6 @@ void PrintHelp() {
       << "\n"
       << "Options:\n"
       << "  --window <int>             Rolling window (default: 50)\n"
-      << "  --strategy <name>          Strategy: baseline|v2 (default: baseline)\n"
       << "  --spike-threshold <float>  Spike threshold in std devs (default: 2.5)\n"
       << "  --position-size <int>      Contracts per entry (default: 3)\n"
       << "  --stop-loss <float>        Stop-loss in price points (default: 3.0)\n"
@@ -159,7 +157,6 @@ int RunCli(int argc, char** argv) {
   BacktestConfig config;
   std::unordered_map<std::string, std::string> kv;
   bool want_sharpe = false;
-  std::string strategy = "baseline";
   int i = 2;
   while (i < argc) {
     const std::string key = argv[i];
@@ -188,9 +185,6 @@ int RunCli(int argc, char** argv) {
 
   if (kv.find("--outdir") != kv.end()) {
     config.outdir = kv["--outdir"];
-  }
-  if (kv.find("--strategy") != kv.end()) {
-    strategy = kv["--strategy"];
   }
   if (kv.find("--log") != kv.end()) {
     config.log_path = kv["--log"];
@@ -240,13 +234,5 @@ int RunCli(int argc, char** argv) {
     std::cerr << "One or more options are out of valid range\n";
     return 1;
   }
-
-  if (strategy == "baseline") {
-    return RunBacktest(config);
-  }
-  if (strategy == "v2") {
-    return RunBacktestV2(config);
-  }
-  std::cerr << "Invalid --strategy; expected baseline or v2\n";
-  return 1;
+  return RunBacktest(config);
 }

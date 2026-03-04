@@ -33,11 +33,6 @@ struct PositionPlan {
   std::vector<double> thresholds{0.5, 1.0, 1.5};
 };
 
-struct EquityPoint {
-  std::string timestamp;
-  double equity{0.0};
-};
-
 struct RoundTripMetrics {
   int trade_count{0};
   int win_count{0};
@@ -105,13 +100,13 @@ int SignOfPosition(int qty) {
   return 0;
 }
 
-RoundTripMetrics ComputeRoundTripMetrics(const std::vector<TradeRecord>& fills) {
-  RoundTripMetrics m;
+struct RoundTripAccumulator {
+  RoundTripMetrics metrics;
   int running_position = 0;
   bool in_trade = false;
   double current_trade_pnl = 0.0;
 
-  for (const TradeRecord& f : fills) {
+  void Update(const TradeRecord& f) {
     if (!in_trade && running_position == 0 && f.qty != 0) {
       in_trade = true;
       current_trade_pnl = 0.0;
@@ -121,18 +116,16 @@ RoundTripMetrics ComputeRoundTripMetrics(const std::vector<TradeRecord>& fills) 
     running_position += f.qty;
 
     if (in_trade && running_position == 0) {
-      ++m.trade_count;
+      ++metrics.trade_count;
       if (current_trade_pnl > 0.0) {
-        ++m.win_count;
+        ++metrics.win_count;
       }
-      m.total_pnl += current_trade_pnl;
+      metrics.total_pnl += current_trade_pnl;
       in_trade = false;
       current_trade_pnl = 0.0;
     }
   }
-
-  return m;
-}
+};
 
 }  // namespace
 
@@ -160,9 +153,10 @@ int RunBacktest(const BacktestConfig& config) {
   trades_csv << "timestamp,action,qty,price,pnl\n";
 
   RollingStats stats(static_cast<std::size_t>(config.rolling_window));
-  Portfolio portfolio(config.initial_cash);
+  Portfolio portfolio(config.initial_cash, false);
   MaxDrawdownTracker drawdown;
   SharpeTracker sharpe;
+  RoundTripAccumulator round_trips;
 
   SpikeCandidate candidate;
   PositionPlan position_plan;
@@ -170,8 +164,17 @@ int RunBacktest(const BacktestConfig& config) {
   int ticks_in_position = 0;
   double prev_equity = config.initial_cash;
 
-  std::vector<EquityPoint> equity_points;
-  equity_points.reserve(200000);
+  double final_equity = config.initial_cash;
+
+  auto ApplyAndRecordFill = [&](const std::string& timestamp, const std::string& action_name, int qty_signed,
+                                double market_price) {
+    TradeRecord tr;
+    portfolio.ApplyFill(timestamp, action_name, qty_signed, market_price, config.fee_per_contract,
+                        config.slippage_points, &tr);
+    trades_csv << tr.timestamp << "," << tr.action << "," << tr.qty << "," << std::fixed
+               << std::setprecision(6) << tr.price << "," << tr.pnl << "\n";
+    round_trips.Update(tr);
+  };
 
   CsvReadStats csv_stats;
   std::string csv_error;
@@ -195,8 +198,7 @@ int RunBacktest(const BacktestConfig& config) {
           confirm_status = confirmed ? "confirmed" : "rejected";
           if (confirmed && portfolio.PositionQty() == 0) {
             const int entry_qty = candidate.kind == SpikeKind::kUp ? -config.position_size : config.position_size;
-            portfolio.ApplyFill(tick.timestamp, "entry", entry_qty, tick.price, config.fee_per_contract,
-                                config.slippage_points);
+            ApplyAndRecordFill(tick.timestamp, "entry", entry_qty, tick.price);
             position_plan.initial_qty = std::abs(entry_qty);
             position_plan.stage_index = 0;
             ticks_in_position = 0;
@@ -247,8 +249,7 @@ int RunBacktest(const BacktestConfig& config) {
               }
               if (qty_to_exit > 0) {
                 const int signed_exit = sign > 0 ? -qty_to_exit : qty_to_exit;
-                portfolio.ApplyFill(tick.timestamp, "exit", signed_exit, tick.price, config.fee_per_contract,
-                                    config.slippage_points);
+                ApplyAndRecordFill(tick.timestamp, "exit", signed_exit, tick.price);
                 action = action == "none" ? "gradual_exit" : action + "|gradual_exit";
                 ++position_plan.stage_index;
               }
@@ -258,16 +259,14 @@ int RunBacktest(const BacktestConfig& config) {
           // Stop-loss.
           if (portfolio.PositionQty() != 0 && adverse_move >= config.stop_loss_points) {
             const int signed_exit = -portfolio.PositionQty();
-            portfolio.ApplyFill(tick.timestamp, "stop_loss", signed_exit, tick.price, config.fee_per_contract,
-                                config.slippage_points);
+            ApplyAndRecordFill(tick.timestamp, "stop_loss", signed_exit, tick.price);
             action = action == "none" ? "stop_loss" : action + "|stop_loss";
           }
 
           // Max hold.
           if (portfolio.PositionQty() != 0 && ticks_in_position >= config.max_hold_ticks) {
             const int signed_exit = -portfolio.PositionQty();
-            portfolio.ApplyFill(tick.timestamp, "max_hold", signed_exit, tick.price, config.fee_per_contract,
-                                config.slippage_points);
+            ApplyAndRecordFill(tick.timestamp, "max_hold", signed_exit, tick.price);
             action = action == "none" ? "max_hold_exit" : action + "|max_hold_exit";
           }
 
@@ -287,7 +286,7 @@ int RunBacktest(const BacktestConfig& config) {
         }
         prev_equity = equity;
 
-        equity_points.push_back(EquityPoint{tick.timestamp, equity});
+        final_equity = equity;
         equity_csv << tick.timestamp << "," << std::fixed << std::setprecision(6) << equity << "\n";
 
         tick_log.LogRow(tick.timestamp, tick.price, stats.Mean(), stats.StdDev(), SpikeToString(spike_flag),
@@ -302,15 +301,7 @@ int RunBacktest(const BacktestConfig& config) {
     return 1;
   }
 
-  const std::vector<TradeRecord>& trades = portfolio.Trades();
-  for (const TradeRecord& t : trades) {
-    trades_csv << t.timestamp << "," << t.action << "," << t.qty << ","
-               << std::fixed << std::setprecision(6) << t.price << "," << t.pnl << "\n";
-  }
-
-  const RoundTripMetrics rt = ComputeRoundTripMetrics(trades);
-
-  const double final_equity = equity_points.empty() ? config.initial_cash : equity_points.back().equity;
+  const RoundTripMetrics rt = round_trips.metrics;
   const double total_return = config.initial_cash != 0.0 ? (final_equity - config.initial_cash) / config.initial_cash
                                                           : 0.0;
   const int trade_count = rt.trade_count;
