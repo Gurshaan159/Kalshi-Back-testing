@@ -1,0 +1,5 @@
+C:/Users/thukr/Kalshi-Back-testing/build/CMakeFiles/kalshi_backtest.dir
+C:/Users/thukr/Kalshi-Back-testing/build/CMakeFiles/kalshi_backtest_tests.dir
+C:/Users/thukr/Kalshi-Back-testing/build/CMakeFiles/test.dir
+C:/Users/thukr/Kalshi-Back-testing/build/CMakeFiles/edit_cache.dir
+C:/Users/thukr/Kalshi-Back-testing/build/CMakeFiles/rebuild_cache.dir

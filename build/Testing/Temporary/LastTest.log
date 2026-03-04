@@ -1,0 +1,19 @@
+Start testing: Mar 03 22:35 US Eastern Standard Time
+----------------------------------------------------------
+1/1 Testing: kalshi_backtest_tests
+1/1 Test: kalshi_backtest_tests
+Command: "C:/Users/thukr/Kalshi-Back-testing/build/kalshi_backtest_tests.exe"
+Directory: C:/Users/thukr/Kalshi-Back-testing/build
+"kalshi_backtest_tests" start time: Mar 03 22:35 US Eastern Standard Time
+Output:
+----------------------------------------------------------
+All tests passed
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"kalshi_backtest_tests" end time: Mar 03 22:35 US Eastern Standard Time
+"kalshi_backtest_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 03 22:35 US Eastern Standard Time
