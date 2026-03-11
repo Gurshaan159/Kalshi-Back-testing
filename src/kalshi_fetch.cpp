@@ -268,7 +268,11 @@ bool GetPricePointsFromObj(const std::string& obj, const std::string& base_key, 
 
 bool FetchUrlToFile(const std::string& url, const std::string& api_key, const std::string& out_file) {
   std::ostringstream cmd;
+#ifdef _WIN32
   cmd << "curl.exe -sS --fail \"" << url << "\"";
+#else
+  cmd << "curl -sS --fail \"" << url << "\"";
+#endif
   if (!api_key.empty()) {
     cmd << " -H \"KALSHI-ACCESS-KEY: " << api_key << "\"";
   }

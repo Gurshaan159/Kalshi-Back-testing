@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include "csv_reader.hpp"
+#include "execution.hpp"
 #include "metrics.hpp"
 #include "portfolio.hpp"
 #include "rolling_stats.hpp"
@@ -166,14 +167,19 @@ int RunBacktest(const BacktestConfig& config) {
 
   double final_equity = config.initial_cash;
 
-  auto ApplyAndRecordFill = [&](const std::string& timestamp, const std::string& action_name, int qty_signed,
-                                double market_price) {
+  auto ApplyAndRecordFill = [&](const Tick& tick, const std::string& action_name, int qty_signed) {
+    const OrderRequest order{tick.timestamp, action_name, qty_signed};
+    const ExecutionResult exec = SimulateFill(tick, order, config);
+    if (!exec.did_fill) {
+      return false;
+    }
     TradeRecord tr;
-    portfolio.ApplyFill(timestamp, action_name, qty_signed, market_price, config.fee_per_contract,
-                        config.slippage_points, &tr);
+    portfolio.ApplyFill(order.timestamp, order.action, exec.filled_qty_signed, exec.fill_price,
+                        config.fee_per_contract, &tr);
     trades_csv << tr.timestamp << "," << tr.action << "," << tr.qty << "," << std::fixed
                << std::setprecision(6) << tr.price << "," << tr.pnl << "\n";
     round_trips.Update(tr);
+    return true;
   };
 
   CsvReadStats csv_stats;
@@ -198,12 +204,13 @@ int RunBacktest(const BacktestConfig& config) {
           confirm_status = confirmed ? "confirmed" : "rejected";
           if (confirmed && portfolio.PositionQty() == 0) {
             const int entry_qty = candidate.kind == SpikeKind::kUp ? -config.position_size : config.position_size;
-            ApplyAndRecordFill(tick.timestamp, "entry", entry_qty, tick.price);
-            position_plan.initial_qty = std::abs(entry_qty);
-            position_plan.stage_index = 0;
-            ticks_in_position = 0;
-            action = "enter";
-            entered_this_tick = true;
+            if (ApplyAndRecordFill(tick, "entry", entry_qty)) {
+              position_plan.initial_qty = std::abs(portfolio.PositionQty());
+              position_plan.stage_index = 0;
+              ticks_in_position = 0;
+              action = "enter";
+              entered_this_tick = true;
+            }
           }
           candidate.active = false;
         } else if (candidate.active && tick_index > candidate.tick_index + 1U) {
@@ -249,9 +256,10 @@ int RunBacktest(const BacktestConfig& config) {
               }
               if (qty_to_exit > 0) {
                 const int signed_exit = sign > 0 ? -qty_to_exit : qty_to_exit;
-                ApplyAndRecordFill(tick.timestamp, "exit", signed_exit, tick.price);
-                action = action == "none" ? "gradual_exit" : action + "|gradual_exit";
-                ++position_plan.stage_index;
+                if (ApplyAndRecordFill(tick, "exit", signed_exit)) {
+                  action = action == "none" ? "gradual_exit" : action + "|gradual_exit";
+                  ++position_plan.stage_index;
+                }
               }
             }
           }
@@ -259,15 +267,17 @@ int RunBacktest(const BacktestConfig& config) {
           // Stop-loss.
           if (portfolio.PositionQty() != 0 && adverse_move >= config.stop_loss_points) {
             const int signed_exit = -portfolio.PositionQty();
-            ApplyAndRecordFill(tick.timestamp, "stop_loss", signed_exit, tick.price);
-            action = action == "none" ? "stop_loss" : action + "|stop_loss";
+            if (ApplyAndRecordFill(tick, "stop_loss", signed_exit)) {
+              action = action == "none" ? "stop_loss" : action + "|stop_loss";
+            }
           }
 
           // Max hold.
           if (portfolio.PositionQty() != 0 && ticks_in_position >= config.max_hold_ticks) {
             const int signed_exit = -portfolio.PositionQty();
-            ApplyAndRecordFill(tick.timestamp, "max_hold", signed_exit, tick.price);
-            action = action == "none" ? "max_hold_exit" : action + "|max_hold_exit";
+            if (ApplyAndRecordFill(tick, "max_hold", signed_exit)) {
+              action = action == "none" ? "max_hold_exit" : action + "|max_hold_exit";
+            }
           }
 
           if (portfolio.PositionQty() == 0) {

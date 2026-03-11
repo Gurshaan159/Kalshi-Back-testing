@@ -26,18 +26,15 @@ class Portfolio {
   FillResult ApplyFill(const std::string& timestamp,
                        const std::string& action,
                        int qty_signed,
-                       double market_price,
+                       double fill_price,
                        double fee_per_contract,
-                      double slippage_points,
-                      TradeRecord* out_trade = nullptr) {
+                       TradeRecord* out_trade = nullptr) {
     FillResult result;
     if (qty_signed == 0) {
       return result;
     }
 
-    const int direction = qty_signed > 0 ? 1 : -1;
     const int qty_abs = std::abs(qty_signed);
-    const double fill_price = market_price + static_cast<double>(direction) * slippage_points;
     const double fee_cost = fee_per_contract * static_cast<double>(qty_abs);
 
     // Cash flow: buy decreases cash, sell increases cash.

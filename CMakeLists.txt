@@ -9,6 +9,7 @@ add_executable(kalshi_backtest
   src/main.cpp
   src/cli.cpp
   src/csv_reader.cpp
+  src/execution.cpp
   src/engine.cpp
   src/kalshi_fetch.cpp
 )
@@ -45,6 +46,8 @@ add_executable(kalshi_backtest_tests
   tests/test_spike_detection.cpp
   tests/test_portfolio.cpp
   tests/test_max_drawdown.cpp
+  tests/test_execution.cpp
+  src/execution.cpp
 )
 target_include_directories(kalshi_backtest_tests PRIVATE include)
 if(MSVC)

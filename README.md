@@ -5,7 +5,7 @@ A C++17 command-line backtesting project for Kalshi market data, focused on a sp
 This repository includes:
 - a production-like backtest executable
 - a fetch utility for pulling Kalshi candlestick data into CSV
-- unit tests for core strategy math and portfolio logic
+- unit tests for core strategy math, portfolio logic, and execution fills
 - PowerShell helper scripts for build, test, run, and output inspection
 
 ## What This Project Does
@@ -27,16 +27,17 @@ After each run, it writes:
 - Streaming CSV reader for larger datasets
 - Rolling mean/stddev spike detector
 - Strict anti-lookahead processing flow
-- Configurable costs (fee + slippage)
+- Realistic execution simulation using quotes, spread guards, and volume caps
+- Configurable costs (fee + directional slippage)
 - Optional Sharpe ratio computation
 - Kalshi candlestick fetch command with CSV export
 - Unit test executable wired to `ctest`
 
 ## Repository Layout
 
-- `src/` - CLI, engine loop, CSV reader, Kalshi fetch implementation
-- `include/` - public headers for config, strategy primitives, metrics, portfolio
-- `tests/` - unit tests (`rolling_stats`, spike detection behavior, portfolio, drawdown)
+- `src/` - CLI, engine loop, CSV reader, execution simulator, Kalshi fetch implementation
+- `include/` - public headers for config, strategy primitives, execution, metrics, portfolio
+- `tests/` - unit tests (`rolling_stats`, spike detection behavior, portfolio, drawdown, execution)
 - `scripts/` - PowerShell helpers for quick workflows
 - `docs/` - design notes and market research docs
 - `data/` - input datasets and fetched CSVs
@@ -55,7 +56,7 @@ After each run, it writes:
 
 ### Optional
 
-- `curl.exe` (used by `fetch` command on Windows in current implementation)
+- `curl` on Linux/macOS or `curl.exe` on Windows (used by `fetch`)
 - PowerShell (for scripts in `scripts/`)
 
 ## Quick Start (Windows PowerShell)
@@ -156,6 +157,30 @@ kalshi_backtest fetch --contract KXHIGHTDC-26MAR03-T45 --out data/fetched/kxhigh
 
 If `--start-ts` / `--end-ts` are omitted, fetch defaults to approximately the last 24 hours.
 
+## Execution and Fill Model
+
+Order fills are simulated before they reach the portfolio ledger.
+
+Current rules:
+- Buy orders use `ask` when available, otherwise `price`.
+- Sell orders use `bid` when available, otherwise `price`.
+- Directional slippage is applied in execution:
+  - buy: `+slippage`
+  - sell: `-slippage`
+- If both `bid` and `ask` exist, fills are rejected when `ask - bid > max_spread_points`.
+- If `volume` exists, fill size is capped to `floor(volume * volume_fill_ratio)`.
+- If capped size is below requested size:
+  - partially fill when partials are enabled
+  - otherwise reject
+
+Default execution controls in `BacktestConfig`:
+- `max_spread_points = 2.0`
+- `volume_fill_ratio = 0.25`
+- `allow_partial_fills = true`
+- `use_quotes_for_fills = true`
+
+Note: these execution controls are currently code-level config fields and are not exposed as CLI flags.
+
 ## Input Data Requirements
 
 Expected CSV columns:
@@ -228,11 +253,13 @@ This runs:
 - executable not found after build
   - run `cmake --build build --config Release` and check `build/` or `build/Release/`
 - fetch fails
-  - verify contract ticker, time window, network access, and that `curl.exe` exists
+  - verify contract ticker, time window, and network access
+  - verify `curl` (Linux/macOS) or `curl.exe` (Windows) is installed and on `PATH`
 - no rows fetched
-  - widen time range or try another ticker/period
+  - widen time range, try another ticker/period, or use a settled/high-volume market
 - low/zero trade counts
   - tune `--window` and `--spike-threshold`, validate dataset volatility
+  - check whether spread/volume execution filters are too strict for the dataset
 
 ## Performance Notes
 
@@ -243,13 +270,14 @@ This runs:
 ## Important Limitations
 
 - This is a research/backtesting tool, not a live trading system.
-- Market microstructure assumptions are simplified (fixed fee/slippage model).
+- Market microstructure assumptions are still simplified (no queue priority, no pending order book simulation, no maker/taker routing).
 - Backtest realism depends heavily on input data quality and timestamp ordering.
 
 ## Suggested Next Improvements
 
 - add `.gitignore` for build/log/output artifacts if cleaner repo history is desired
-- support richer execution model (spread-aware fills, latency assumptions)
+- expose execution controls (`max_spread_points`, `volume_fill_ratio`, partial-fill toggle) as CLI flags
+- support richer execution model extensions (latency assumptions, queue priority)
 - add parameter sweep/optimization runner
 - add CI workflow for build + tests
 - add plotting notebook or script for equity/trade analytics
