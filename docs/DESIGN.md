@@ -12,7 +12,8 @@
 - `src/main.cpp`: entrypoint and top-level error handling.
 - `src/cli.cpp` + `include/cli.hpp`: CLI parsing and command execution.
 - `src/csv_reader.cpp` + `include/csv_reader.hpp`: streaming CSV parser.
-- `src/engine.cpp` + `include/engine.hpp`: simulation loop and outputs.
+- `src/engine.cpp` + `include/engine.hpp`: single-run simulation loop, result object, and outputs.
+- `src/sweep.cpp` + `include/sweep.hpp`: parameter-grid orchestration, bounded parallel runs, analysis, report writing.
 - `include/rolling_stats.hpp`: rolling mean/std dev (fixed window, ring buffer).
 - `include/portfolio.hpp`: fill accounting, realized/unrealized PnL, equity fields.
 - `include/metrics.hpp`: one-pass max drawdown, trade stats, optional Sharpe.
@@ -96,6 +97,9 @@ Output files:
 Backtest:
 - `kalshi_backtest backtest --csv data/sample.csv --outdir out --log logs/run.log`
 
+Sweep:
+- `kalshi_backtest sweep --csv data/sample.csv --outdir out/sweeps --logdir logs/sweeps --concurrency 4`
+
 Optional fetch scaffold:
 - `kalshi_backtest fetch --market <id> --contract <id> --out data/kalshi.csv`
 
@@ -111,6 +115,11 @@ Main config flags (CLI-configurable):
 - `--sharpe` (optional enable)
 
 `--help` prints usage.
+
+Sweep ranking rules:
+- Eligible: `trade_count >= 10` and `total_pnl > 0`
+- Primary rank: Sharpe descending
+- Ties: lower max drawdown, then higher total PnL
 
 ## Build, Run, Test, Debug
 

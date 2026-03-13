@@ -30,6 +30,7 @@ After each run, it writes:
 - Realistic execution simulation using quotes, spread guards, and volume caps
 - Configurable costs (fee + directional slippage)
 - Optional Sharpe ratio computation
+- Parameter sweep mode with bounded parallelism and markdown reporting
 - Kalshi candlestick fetch command with CSV export
 - Unit test executable wired to `ctest`
 
@@ -137,7 +138,34 @@ Example:
 kalshi_backtest backtest --csv data/sample.csv --outdir out/run1 --log logs/run1.log --window 60 --spike-threshold 2.8 --position-size 2 --sharpe
 ```
 
-### 2) Fetch Kalshi candles to CSV
+### 2) Sweep parameter grid (108 full combinations)
+
+```bash
+kalshi_backtest sweep --csv <path> [--outdir <dir>] [--logdir <dir>] [--concurrency <n>] [options]
+```
+
+Sweep grid is fixed to:
+- `spike_threshold`: `2.0, 2.5, 3.0, 3.5`
+- `position_size`: `1, 2, 4`
+- `stop_loss_points`: `1.5, 3.0, 4.5`
+- `max_hold_ticks`: `50, 100, 150`
+
+Total combinations: `4 x 3 x 3 x 3 = 108`
+
+Sweep options:
+- `--concurrency <int>` worker cap (default `min(cpu_count, 8)`)
+- `--outdir <dir>` batch output root (default `out/sweeps`)
+- `--logdir <dir>` batch log root (default `logs/sweeps`)
+- `--sweep-id <id>` optional explicit batch folder name
+- `--no-sharpe` disable Sharpe calculation in sweep runs
+
+Example:
+
+```bash
+kalshi_backtest sweep --csv data/high_vol_week_1m/kxhighchi_week_1m.csv --outdir out/sweeps --logdir logs/sweeps --concurrency 4
+```
+
+### 3) Fetch Kalshi candles to CSV
 
 ```bash
 kalshi_backtest fetch --contract <ticker> --out <path> [options]
@@ -213,6 +241,15 @@ Per run, output directory contains:
 - tick log (`--log` path)
   - includes rolling stats, spike flags, confirmation status, action, position, and equity
 
+Sweep mode writes a batch directory:
+- `config.json` exact sweep config and execution settings
+- `summary.json` batch-level totals and top run IDs
+- `summary.csv` flat row per run (params, metrics, status)
+- `report.md` rankings, sensitivities, interactions, interpretation
+- `runs/<run-id>/`
+  - `result.json` structured run metadata + metrics + status
+  - `equity.csv`, `trades.csv`, `metrics.json` (same per-run format as single mode)
+
 ## Strategy Overview
 
 High-level loop:
@@ -278,7 +315,7 @@ This runs:
 - add `.gitignore` for build/log/output artifacts if cleaner repo history is desired
 - expose execution controls (`max_spread_points`, `volume_fill_ratio`, partial-fill toggle) as CLI flags
 - support richer execution model extensions (latency assumptions, queue priority)
-- add parameter sweep/optimization runner
+- add optional CSV preload/cache mode for large sweep workloads
 - add CI workflow for build + tests
 - add plotting notebook or script for equity/trade analytics
 

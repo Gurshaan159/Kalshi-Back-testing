@@ -2,6 +2,7 @@
 
 #include "engine.hpp"
 #include "kalshi_fetch.hpp"
+#include "sweep.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -17,6 +18,7 @@ void PrintHelp() {
       << "\n"
       << "Commands:\n"
       << "  backtest --csv <path> --outdir <dir> --log <path> [options]\n"
+      << "  sweep --csv <path> [--outdir <dir>] [--logdir <dir>] [--concurrency <n>] [options]\n"
       << "  fetch --contract <ticker> --out <path> [--api-key <key>] [--start-ts <unix>] [--end-ts <unix>] [--period <1|60|1440>]\n"
       << "\n"
       << "Options:\n"
@@ -29,6 +31,10 @@ void PrintHelp() {
       << "  --slippage <float>         Slippage per fill points (default: 0.50)\n"
       << "  --initial-cash <float>     Initial cash (default: 10000)\n"
       << "  --sharpe                   Compute optional Sharpe from per-tick returns\n"
+      << "  --no-sharpe                Disable Sharpe computation in sweep mode\n"
+      << "  --concurrency <int>        Sweep worker count (default: min(cpu,8))\n"
+      << "  --logdir <dir>             Sweep log root dir (default: logs/sweeps)\n"
+      << "  --sweep-id <id>            Optional sweep id folder name\n"
       << "  --api-key <key>            Optional Kalshi API key for fetch\n"
       << "  --start-ts <unix>          Fetch start timestamp (seconds)\n"
       << "  --end-ts <unix>            Fetch end timestamp (seconds)\n"
@@ -63,6 +69,65 @@ bool ParseDouble(const std::string& raw, double* out) {
   } catch (...) {
     return false;
   }
+}
+
+bool ApplyBacktestOptions(const std::unordered_map<std::string, std::string>& kv,
+                          BacktestConfig* config,
+                          std::string* error) {
+  if (kv.find("--csv") == kv.end()) {
+    *error = "--csv is required";
+    return false;
+  }
+  config->csv_path = kv.at("--csv");
+
+  if (kv.find("--outdir") != kv.end()) {
+    config->outdir = kv.at("--outdir");
+  }
+  if (kv.find("--log") != kv.end()) {
+    config->log_path = kv.at("--log");
+  }
+  if (kv.find("--window") != kv.end() && !ParseInt(kv.at("--window"), &config->rolling_window)) {
+    *error = "Invalid --window";
+    return false;
+  }
+  if (kv.find("--spike-threshold") != kv.end() &&
+      !ParseDouble(kv.at("--spike-threshold"), &config->spike_threshold)) {
+    *error = "Invalid --spike-threshold";
+    return false;
+  }
+  if (kv.find("--position-size") != kv.end() &&
+      !ParseInt(kv.at("--position-size"), &config->position_size)) {
+    *error = "Invalid --position-size";
+    return false;
+  }
+  if (kv.find("--stop-loss") != kv.end() &&
+      !ParseDouble(kv.at("--stop-loss"), &config->stop_loss_points)) {
+    *error = "Invalid --stop-loss";
+    return false;
+  }
+  if (kv.find("--max-hold") != kv.end() && !ParseInt(kv.at("--max-hold"), &config->max_hold_ticks)) {
+    *error = "Invalid --max-hold";
+    return false;
+  }
+  if (kv.find("--fee") != kv.end() && !ParseDouble(kv.at("--fee"), &config->fee_per_contract)) {
+    *error = "Invalid --fee";
+    return false;
+  }
+  if (kv.find("--slippage") != kv.end() && !ParseDouble(kv.at("--slippage"), &config->slippage_points)) {
+    *error = "Invalid --slippage";
+    return false;
+  }
+  if (kv.find("--initial-cash") != kv.end() && !ParseDouble(kv.at("--initial-cash"), &config->initial_cash)) {
+    *error = "Invalid --initial-cash";
+    return false;
+  }
+  if (config->rolling_window <= 1 || config->position_size <= 0 || config->max_hold_ticks <= 0 ||
+      config->spike_threshold <= 0.0 || config->stop_loss_points <= 0.0 || config->fee_per_contract < 0.0 ||
+      config->slippage_points < 0.0) {
+    *error = "One or more options are out of valid range";
+    return false;
+  }
+  return true;
 }
 
 }  // namespace
@@ -148,6 +213,76 @@ int RunCli(int argc, char** argv) {
     return RunFetch(fetch_cfg);
   }
 
+  if (command == "sweep") {
+    BacktestConfig config;
+    std::unordered_map<std::string, std::string> kv;
+    bool want_sharpe = true;
+    int i = 2;
+    while (i < argc) {
+      const std::string key = argv[i];
+      if (key == "--help" || key == "-h") {
+        PrintHelp();
+        return 0;
+      }
+      if (key == "--sharpe") {
+        want_sharpe = true;
+        ++i;
+        continue;
+      }
+      if (key == "--no-sharpe") {
+        want_sharpe = false;
+        ++i;
+        continue;
+      }
+      if (i + 1 >= argc) {
+        std::cerr << "Missing value after " << key << "\n";
+        return 1;
+      }
+      kv[key] = argv[i + 1];
+      i += 2;
+    }
+
+    std::string error;
+    if (!ApplyBacktestOptions(kv, &config, &error)) {
+      std::cerr << error << "\n";
+      return 1;
+    }
+    config.compute_sharpe = want_sharpe;
+
+    SweepRunOptions sweep_options;
+    if (kv.find("--outdir") != kv.end()) {
+      sweep_options.out_root_dir = kv["--outdir"];
+    }
+    if (kv.find("--logdir") != kv.end()) {
+      sweep_options.log_root_dir = kv["--logdir"];
+    }
+    if (kv.find("--sweep-id") != kv.end()) {
+      sweep_options.sweep_id = kv["--sweep-id"];
+    }
+    if (kv.find("--concurrency") != kv.end()) {
+      int concurrency = 0;
+      if (!ParseInt(kv["--concurrency"], &concurrency) || concurrency <= 0) {
+        std::cerr << "Invalid --concurrency\n";
+        return 1;
+      }
+      sweep_options.concurrency = concurrency;
+    }
+    sweep_options.force_sharpe = want_sharpe;
+
+    const SweepBatchResult batch =
+        RunSweep(config, sweep_options, SweepGridConfig{}, SweepCombinationFilter{});
+    if (!batch.success) {
+      std::cerr << "Sweep failed: " << batch.error_message << "\n";
+      return 1;
+    }
+    std::cout << "Sweep complete\n";
+    std::cout << "Sweep id: " << batch.sweep_id << "\n";
+    std::cout << "Runs executed: " << batch.total_executed << "\n";
+    std::cout << "Batch outputs: " << batch.batch_output_dir << "\n";
+    std::cout << "Batch logs: " << batch.batch_log_dir << "\n";
+    return 0;
+  }
+
   if (command != "backtest") {
     std::cerr << "Unknown command: " << command << "\n";
     PrintHelp();
@@ -177,62 +312,11 @@ int RunCli(int argc, char** argv) {
     i += 2;
   }
 
-  if (kv.find("--csv") == kv.end()) {
-    std::cerr << "--csv is required\n";
-    return 1;
-  }
-  config.csv_path = kv["--csv"];
-
-  if (kv.find("--outdir") != kv.end()) {
-    config.outdir = kv["--outdir"];
-  }
-  if (kv.find("--log") != kv.end()) {
-    config.log_path = kv["--log"];
-  }
-  if (kv.find("--window") != kv.end() && !ParseInt(kv["--window"], &config.rolling_window)) {
-    std::cerr << "Invalid --window\n";
-    return 1;
-  }
-  if (kv.find("--spike-threshold") != kv.end() &&
-      !ParseDouble(kv["--spike-threshold"], &config.spike_threshold)) {
-    std::cerr << "Invalid --spike-threshold\n";
-    return 1;
-  }
-  if (kv.find("--position-size") != kv.end() &&
-      !ParseInt(kv["--position-size"], &config.position_size)) {
-    std::cerr << "Invalid --position-size\n";
-    return 1;
-  }
-  if (kv.find("--stop-loss") != kv.end() &&
-      !ParseDouble(kv["--stop-loss"], &config.stop_loss_points)) {
-    std::cerr << "Invalid --stop-loss\n";
-    return 1;
-  }
-  if (kv.find("--max-hold") != kv.end() && !ParseInt(kv["--max-hold"], &config.max_hold_ticks)) {
-    std::cerr << "Invalid --max-hold\n";
-    return 1;
-  }
-  if (kv.find("--fee") != kv.end() && !ParseDouble(kv["--fee"], &config.fee_per_contract)) {
-    std::cerr << "Invalid --fee\n";
-    return 1;
-  }
-  if (kv.find("--slippage") != kv.end() &&
-      !ParseDouble(kv["--slippage"], &config.slippage_points)) {
-    std::cerr << "Invalid --slippage\n";
-    return 1;
-  }
-  if (kv.find("--initial-cash") != kv.end() &&
-      !ParseDouble(kv["--initial-cash"], &config.initial_cash)) {
-    std::cerr << "Invalid --initial-cash\n";
+  std::string error;
+  if (!ApplyBacktestOptions(kv, &config, &error)) {
+    std::cerr << error << "\n";
     return 1;
   }
   config.compute_sharpe = want_sharpe;
-
-  if (config.rolling_window <= 1 || config.position_size <= 0 || config.max_hold_ticks <= 0 ||
-      config.spike_threshold <= 0.0 || config.stop_loss_points <= 0.0 || config.fee_per_contract < 0.0 ||
-      config.slippage_points < 0.0) {
-    std::cerr << "One or more options are out of valid range\n";
-    return 1;
-  }
   return RunBacktest(config);
 }

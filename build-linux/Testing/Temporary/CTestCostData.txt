@@ -1,0 +1,2 @@
+kalshi_backtest_tests 1 0.00735195
+---

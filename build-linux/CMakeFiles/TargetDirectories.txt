@@ -1,0 +1,5 @@
+/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles/kalshi_backtest.dir
+/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles/kalshi_backtest_tests.dir
+/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles/test.dir
+/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles/edit_cache.dir
+/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles/rebuild_cache.dir

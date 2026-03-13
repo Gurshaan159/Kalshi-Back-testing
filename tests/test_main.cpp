@@ -10,6 +10,11 @@ bool TestSpreadRejection();
 bool TestVolumeBasedPartialFill();
 bool TestFallbackToTickPriceWhenQuotesMissing();
 bool TestOversizedOrderRejectedWhenPartialsDisabled();
+bool TestSweepGridRawCount();
+bool TestSweepGridFilterBehavior();
+bool TestSweepRankingLogic();
+bool TestSweepSensitivityAggregation();
+bool TestSweepInteractionAggregation();
 
 int main() {
   if (!TestRollingStats()) {
@@ -40,6 +45,21 @@ int main() {
     return 1;
   }
   if (!TestOversizedOrderRejectedWhenPartialsDisabled()) {
+    return 1;
+  }
+  if (!TestSweepGridRawCount()) {
+    return 1;
+  }
+  if (!TestSweepGridFilterBehavior()) {
+    return 1;
+  }
+  if (!TestSweepRankingLogic()) {
+    return 1;
+  }
+  if (!TestSweepSensitivityAggregation()) {
+    return 1;
+  }
+  if (!TestSweepInteractionAggregation()) {
     return 1;
   }
   std::cout << "All tests passed\n";

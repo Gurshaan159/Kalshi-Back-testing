@@ -1,0 +1,32 @@
+{
+  "run_id": "run-0046",
+  "status": "ok",
+  "error": "",
+  "duration_ms": 126,
+  "params": {
+    "spike_threshold": 2.500000,
+    "position_size": 4,
+    "stop_loss_points": 1.500000,
+    "max_hold_ticks": 50
+  },
+  "metrics": {
+    "final_equity": 9718.800000,
+    "total_pnl": -281.200000,
+    "total_return": -0.028120,
+    "trade_count": 35,
+    "win_rate": 0.085714,
+    "avg_trade_pnl": -8.034286,
+    "max_drawdown": 0.035080,
+    "sharpe": -0.003951,
+    "fill_attempts": 355,
+    "fill_rejections": 269,
+    "partial_fill_count": 16,
+    "requested_contracts": 1152,
+    "filled_contracts": 232
+  },
+  "csv_stats": {
+    "rows_total": 10405,
+    "rows_emitted": 10405,
+    "rows_skipped": 0
+  }
+}

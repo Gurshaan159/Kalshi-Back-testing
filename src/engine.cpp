@@ -8,10 +8,12 @@
 #include "tick_logger.hpp"
 
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -130,28 +132,48 @@ struct RoundTripAccumulator {
 
 }  // namespace
 
-int RunBacktest(const BacktestConfig& config) {
+BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
+                                    const std::string& run_id,
+                                    const SingleRunOutputOptions& output_options) {
   using Clock = std::chrono::steady_clock;
   const auto start = Clock::now();
 
-  fs::create_directories(config.outdir);
-  EnsureParentDir(config.log_path);
+  BacktestRunResult result;
+  result.run_id = run_id;
+  result.config_used = config;
 
-  TickLogger tick_log(config.log_path);
-  if (!tick_log.IsOpen()) {
-    std::cerr << "Unable to open log path: " << config.log_path << "\n";
-    return 1;
-  }
-  tick_log.WriteHeader();
+  auto SetDuration = [&]() {
+    result.duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - start).count();
+  };
+  auto Fail = [&](const std::string& message) {
+    result.success = false;
+    result.error_message = message;
+    SetDuration();
+    return result;
+  };
 
-  std::ofstream equity_csv((fs::path(config.outdir) / "equity.csv").string(), std::ios::out | std::ios::trunc);
-  std::ofstream trades_csv((fs::path(config.outdir) / "trades.csv").string(), std::ios::out | std::ios::trunc);
-  if (!equity_csv.is_open() || !trades_csv.is_open()) {
-    std::cerr << "Unable to open output files in outdir: " << config.outdir << "\n";
-    return 1;
+  std::unique_ptr<TickLogger> tick_log;
+  std::ofstream equity_csv;
+  std::ofstream trades_csv;
+
+  if (output_options.write_outputs) {
+    fs::create_directories(config.outdir);
+    EnsureParentDir(config.log_path);
+
+    tick_log = std::make_unique<TickLogger>(config.log_path);
+    if (!tick_log->IsOpen()) {
+      return Fail("Unable to open log path: " + config.log_path);
+    }
+    tick_log->WriteHeader();
+
+    equity_csv.open((fs::path(config.outdir) / "equity.csv").string(), std::ios::out | std::ios::trunc);
+    trades_csv.open((fs::path(config.outdir) / "trades.csv").string(), std::ios::out | std::ios::trunc);
+    if (!equity_csv.is_open() || !trades_csv.is_open()) {
+      return Fail("Unable to open output files in outdir: " + config.outdir);
+    }
+    equity_csv << "timestamp,equity\n";
+    trades_csv << "timestamp,action,qty,price,pnl\n";
   }
-  equity_csv << "timestamp,equity\n";
-  trades_csv << "timestamp,action,qty,price,pnl\n";
 
   RollingStats stats(static_cast<std::size_t>(config.rolling_window));
   Portfolio portfolio(config.initial_cash, false);
@@ -166,18 +188,32 @@ int RunBacktest(const BacktestConfig& config) {
   double prev_equity = config.initial_cash;
 
   double final_equity = config.initial_cash;
+  int fill_attempts = 0;
+  int fill_rejections = 0;
+  int partial_fill_count = 0;
+  int requested_contracts = 0;
+  int filled_contracts = 0;
 
   auto ApplyAndRecordFill = [&](const Tick& tick, const std::string& action_name, int qty_signed) {
+    ++fill_attempts;
+    requested_contracts += std::abs(qty_signed);
     const OrderRequest order{tick.timestamp, action_name, qty_signed};
     const ExecutionResult exec = SimulateFill(tick, order, config);
     if (!exec.did_fill) {
+      ++fill_rejections;
       return false;
+    }
+    filled_contracts += std::abs(exec.filled_qty_signed);
+    if (exec.was_partial) {
+      ++partial_fill_count;
     }
     TradeRecord tr;
     portfolio.ApplyFill(order.timestamp, order.action, exec.filled_qty_signed, exec.fill_price,
                         config.fee_per_contract, &tr);
-    trades_csv << tr.timestamp << "," << tr.action << "," << tr.qty << "," << std::fixed
-               << std::setprecision(6) << tr.price << "," << tr.pnl << "\n";
+    if (output_options.write_outputs) {
+      trades_csv << tr.timestamp << "," << tr.action << "," << tr.qty << "," << std::fixed
+                 << std::setprecision(6) << tr.price << "," << tr.pnl << "\n";
+    }
     round_trips.Update(tr);
     return true;
   };
@@ -297,18 +333,18 @@ int RunBacktest(const BacktestConfig& config) {
         prev_equity = equity;
 
         final_equity = equity;
-        equity_csv << tick.timestamp << "," << std::fixed << std::setprecision(6) << equity << "\n";
-
-        tick_log.LogRow(tick.timestamp, tick.price, stats.Mean(), stats.StdDev(), SpikeToString(spike_flag),
-                        confirm_status, action, portfolio.PositionQty(), portfolio.Cash(), equity,
-                        portfolio.RealizedPnl(), unrealized);
+        if (output_options.write_outputs) {
+          equity_csv << tick.timestamp << "," << std::fixed << std::setprecision(6) << equity << "\n";
+          tick_log->LogRow(tick.timestamp, tick.price, stats.Mean(), stats.StdDev(), SpikeToString(spike_flag),
+                           confirm_status, action, portfolio.PositionQty(), portfolio.Cash(), equity,
+                           portfolio.RealizedPnl(), unrealized);
+        }
         return true;
       },
       &csv_stats, &csv_error);
 
   if (!ok) {
-    std::cerr << csv_error << "\n";
-    return 1;
+    return Fail(csv_error);
   }
 
   const RoundTripMetrics rt = round_trips.metrics;
@@ -318,38 +354,69 @@ int RunBacktest(const BacktestConfig& config) {
   const double win_rate = trade_count > 0 ? static_cast<double>(rt.win_count) / static_cast<double>(trade_count)
                                           : 0.0;
   const double avg_trade_pnl = trade_count > 0 ? rt.total_pnl / static_cast<double>(trade_count) : 0.0;
+  const double total_pnl = final_equity - config.initial_cash;
 
-  std::string metrics_error;
-  const bool metrics_ok = WriteMetricsJson((fs::path(config.outdir) / "metrics.json").string(), total_return,
-                                           drawdown.MaxDrawdown(), trade_count, win_rate, avg_trade_pnl,
-                                           config.compute_sharpe, sharpe.Sharpe(), &metrics_error);
-  if (!metrics_ok) {
-    std::cerr << metrics_error << "\n";
+  if (output_options.write_outputs) {
+    std::string metrics_error;
+    const bool metrics_ok = WriteMetricsJson((fs::path(config.outdir) / "metrics.json").string(), total_return,
+                                             drawdown.MaxDrawdown(), trade_count, win_rate, avg_trade_pnl,
+                                             config.compute_sharpe, sharpe.Sharpe(), &metrics_error);
+    if (!metrics_ok) {
+      return Fail(metrics_error);
+    }
+  }
+
+  result.success = true;
+  result.csv_stats = csv_stats;
+  result.metrics.final_equity = final_equity;
+  result.metrics.total_pnl = total_pnl;
+  result.metrics.total_return = total_return;
+  result.metrics.trade_count = trade_count;
+  result.metrics.win_rate = win_rate;
+  result.metrics.avg_trade_pnl = avg_trade_pnl;
+  result.metrics.max_drawdown = drawdown.MaxDrawdown();
+  result.metrics.sharpe = sharpe.Sharpe();
+  result.metrics.has_sharpe = config.compute_sharpe;
+  result.metrics.fill_attempts = fill_attempts;
+  result.metrics.fill_rejections = fill_rejections;
+  result.metrics.partial_fill_count = partial_fill_count;
+  result.metrics.requested_contracts = requested_contracts;
+  result.metrics.filled_contracts = filled_contracts;
+  SetDuration();
+
+  if (output_options.print_summary) {
+    std::cout << std::fixed << std::setprecision(6);
+    std::cout << "Backtest complete\n";
+    std::cout << "Rows total: " << csv_stats.rows_total << "\n";
+    std::cout << "Rows emitted: " << csv_stats.rows_emitted << "\n";
+    std::cout << "Rows skipped: " << csv_stats.rows_skipped << "\n";
+    std::cout << "Final equity: " << final_equity << "\n";
+    std::cout << "Total return: " << total_return << "\n";
+    std::cout << "Max drawdown: " << drawdown.MaxDrawdown() << "\n";
+    std::cout << "Trade count: " << trade_count << "\n";
+    std::cout << "Win rate: " << win_rate << "\n";
+    std::cout << "Avg trade pnl: " << avg_trade_pnl << "\n";
+    if (config.compute_sharpe) {
+      std::cout << "Sharpe: " << sharpe.Sharpe() << "\n";
+    }
+    std::cout << "Elapsed ms: " << result.duration_ms << "\n";
+    if (output_options.write_outputs) {
+      std::cout << "Outputs: " << (fs::path(config.outdir) / "equity.csv").string() << ", "
+                << (fs::path(config.outdir) / "trades.csv").string() << ", "
+                << (fs::path(config.outdir) / "metrics.json").string() << "\n";
+      std::cout << "Tick log: " << config.log_path << "\n";
+    }
+  }
+
+  return result;
+}
+
+int RunBacktest(const BacktestConfig& config) {
+  const SingleRunOutputOptions options{true, true};
+  const BacktestRunResult result = RunSingleBacktest(config, "single-run", options);
+  if (!result.success) {
+    std::cerr << result.error_message << "\n";
     return 1;
   }
-
-  const auto elapsed_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - start).count();
-
-  std::cout << std::fixed << std::setprecision(6);
-  std::cout << "Backtest complete\n";
-  std::cout << "Rows total: " << csv_stats.rows_total << "\n";
-  std::cout << "Rows emitted: " << csv_stats.rows_emitted << "\n";
-  std::cout << "Rows skipped: " << csv_stats.rows_skipped << "\n";
-  std::cout << "Final equity: " << final_equity << "\n";
-  std::cout << "Total return: " << total_return << "\n";
-  std::cout << "Max drawdown: " << drawdown.MaxDrawdown() << "\n";
-  std::cout << "Trade count: " << trade_count << "\n";
-  std::cout << "Win rate: " << win_rate << "\n";
-  std::cout << "Avg trade pnl: " << avg_trade_pnl << "\n";
-  if (config.compute_sharpe) {
-    std::cout << "Sharpe: " << sharpe.Sharpe() << "\n";
-  }
-  std::cout << "Elapsed ms: " << elapsed_ms << "\n";
-  std::cout << "Outputs: " << (fs::path(config.outdir) / "equity.csv").string() << ", "
-            << (fs::path(config.outdir) / "trades.csv").string() << ", "
-            << (fs::path(config.outdir) / "metrics.json").string() << "\n";
-  std::cout << "Tick log: " << config.log_path << "\n";
-
   return 0;
 }
