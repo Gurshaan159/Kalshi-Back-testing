@@ -7,6 +7,7 @@ This repository includes:
 - a fetch utility for pulling Kalshi candlestick data into CSV
 - unit tests for core strategy math, portfolio logic, and execution fills
 - PowerShell helper scripts for build, test, run, and output inspection
+- a Linux/macOS manual workflow using `cmake` + `ctest`
 
 ## What This Project Does
 
@@ -44,7 +45,7 @@ After each run, it writes:
 - `data/` - input datasets and fetched CSVs
 - `out/` - generated backtest outputs
 - `logs/` - generated run logs and tick logs
-- `build/` - CMake build directory
+- `build/` or `build-linux/` - CMake build directory
 
 ## Prerequisites
 
@@ -59,6 +60,17 @@ After each run, it writes:
 
 - `curl` on Linux/macOS or `curl.exe` on Windows (used by `fetch`)
 - PowerShell (for scripts in `scripts/`)
+
+## Quick Start (Linux/macOS)
+
+From repository root:
+
+```bash
+cmake -S . -B build-linux
+cmake --build build-linux --config Release
+ctest --test-dir build-linux --output-on-failure
+./build-linux/kalshi_backtest backtest --csv data/benchmark_100k_market_1m.csv --outdir out/quickstart-linux --log logs/quickstart-linux.log
+```
 
 ## Quick Start (Windows PowerShell)
 
@@ -80,14 +92,14 @@ Notes:
 ### Configure + build
 
 ```bash
-cmake -S . -B build
-cmake --build build --config Release
+cmake -S . -B build-linux
+cmake --build build-linux --config Release
 ```
 
 ### Run tests
 
 ```bash
-ctest --test-dir build --output-on-failure
+ctest --test-dir build-linux --output-on-failure
 ```
 
 ### Run backtest
@@ -101,7 +113,7 @@ Windows:
 Linux/macOS:
 
 ```bash
-./build/kalshi_backtest backtest --csv data/benchmark_100k_market_1m.csv --outdir out/manual --log logs/manual.log
+./build-linux/kalshi_backtest backtest --csv data/benchmark_100k_market_1m.csv --outdir out/manual --log logs/manual.log
 ```
 
 ## CLI Commands
@@ -109,13 +121,13 @@ Linux/macOS:
 Use help:
 
 ```bash
-kalshi_backtest --help
+./build-linux/kalshi_backtest --help
 ```
 
 ### 1) Backtest
 
 ```bash
-kalshi_backtest backtest --csv <path> --outdir <dir> --log <path> [options]
+./build-linux/kalshi_backtest backtest --csv <path> --outdir <dir> --log <path> [options]
 ```
 
 Required:
@@ -135,13 +147,13 @@ Common optional flags:
 Example:
 
 ```bash
-kalshi_backtest backtest --csv data/sample.csv --outdir out/run1 --log logs/run1.log --window 60 --spike-threshold 2.8 --position-size 2 --sharpe
+./build-linux/kalshi_backtest backtest --csv data/sample.csv --outdir out/run1 --log logs/run1.log --window 60 --spike-threshold 2.8 --position-size 2 --sharpe
 ```
 
 ### 2) Sweep parameter grid (108 full combinations)
 
 ```bash
-kalshi_backtest sweep --csv <path> [--outdir <dir>] [--logdir <dir>] [--concurrency <n>] [options]
+./build-linux/kalshi_backtest sweep --csv <path> [--outdir <dir>] [--logdir <dir>] [--concurrency <n>] [options]
 ```
 
 Sweep grid is fixed to:
@@ -162,13 +174,13 @@ Sweep options:
 Example:
 
 ```bash
-kalshi_backtest sweep --csv data/high_vol_week_1m/kxhighchi_week_1m.csv --outdir out/sweeps --logdir logs/sweeps --concurrency 4
+./build-linux/kalshi_backtest sweep --csv data/high_vol_week_1m/kxhighchi_week_1m.csv --outdir out/sweeps --logdir logs/sweeps --concurrency 4
 ```
 
 ### 3) Fetch Kalshi candles to CSV
 
 ```bash
-kalshi_backtest fetch --contract <ticker> --out <path> [options]
+./build-linux/kalshi_backtest fetch --contract <ticker> --out <path> [options]
 ```
 
 Options:
@@ -180,7 +192,7 @@ Options:
 Example:
 
 ```bash
-kalshi_backtest fetch --contract KXHIGHTDC-26MAR03-T45 --out data/fetched/kxhigh.csv --period 1
+./build-linux/kalshi_backtest fetch --contract KXHIGHTDC-26MAR03-T45 --out data/fetched/kxhigh.csv --period 1
 ```
 
 If `--start-ts` / `--end-ts` are omitted, fetch defaults to approximately the last 24 hours.
@@ -288,7 +300,7 @@ This runs:
 - `cmake is not installed or not on PATH`
   - install CMake and reopen terminal
 - executable not found after build
-  - run `cmake --build build --config Release` and check `build/` or `build/Release/`
+  - run `cmake --build build-linux --config Release` and check `build-linux/`
 - fetch fails
   - verify contract ticker, time window, and network access
   - verify `curl` (Linux/macOS) or `curl.exe` (Windows) is installed and on `PATH`
