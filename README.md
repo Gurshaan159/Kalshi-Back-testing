@@ -29,6 +29,7 @@ After each run, it writes:
 - Rolling mean/stddev spike detector
 - Strict anti-lookahead processing flow
 - Realistic execution simulation using quotes, spread guards, and volume caps
+- Resting-order execution model (orders can rest for N ticks and fill over time; optional legacy immediate fill)
 - Configurable costs (fee + directional slippage)
 - Optional Sharpe ratio computation
 - Parameter sweep mode with bounded parallelism and markdown reporting
@@ -39,7 +40,7 @@ After each run, it writes:
 
 - `src/` - CLI, engine loop, CSV reader, execution simulator, Kalshi fetch implementation
 - `include/` - public headers for config, strategy primitives, execution, metrics, portfolio
-- `tests/` - unit tests (`rolling_stats`, spike detection behavior, portfolio, drawdown, execution)
+- `tests/` - unit tests (`rolling_stats`, spike detection, portfolio, drawdown, execution, resting order lifecycle and metrics, sweep grid and analysis)
 - `scripts/` - PowerShell helpers for quick workflows
 - `docs/` - design notes and market research docs
 - `data/` - input datasets and fetched CSVs
@@ -143,6 +144,9 @@ Common optional flags:
 - `--slippage <float>` slippage points per fill (default `0.50`)
 - `--initial-cash <float>` starting cash (default `10000`)
 - `--sharpe` include Sharpe calculation
+- `--resting-order-lifetime <int>` ticks a resting order stays active (default `3`)
+- `--no-resting-partials` disable partial fills for resting orders
+- `--disable-resting-orders` use immediate fill only (legacy behavior)
 
 Example:
 
@@ -170,6 +174,8 @@ Sweep options:
 - `--logdir <dir>` batch log root (default `logs/sweeps`)
 - `--sweep-id <id>` optional explicit batch folder name
 - `--no-sharpe` disable Sharpe calculation in sweep runs
+
+Each sweep run uses the same backtest options (e.g. resting-order flags such as `--disable-resting-orders` or `--resting-order-lifetime`) when passed on the command line.
 
 Example:
 
@@ -201,7 +207,11 @@ If `--start-ts` / `--end-ts` are omitted, fetch defaults to approximately the la
 
 Order fills are simulated before they reach the portfolio ledger.
 
-Current rules:
+### Resting orders (default)
+
+By default, the engine uses a **resting order** model: when a signal is generated, an order is placed and can stay active for up to `--resting-order-lifetime` ticks (default 3). Each tick, the order may fill fully, partially, or not at all; after the lifetime expires, any unfilled remainder is canceled. Partial fills over the lifetime are allowed unless `--no-resting-partials` is set. Use `--disable-resting-orders` to revert to legacy behavior (immediate fill or reject only, no resting).
+
+### Quote and volume rules
 - Buy orders use `ask` when available, otherwise `price`.
 - Sell orders use `bid` when available, otherwise `price`.
 - Directional slippage is applied in execution:
@@ -250,6 +260,7 @@ Per run, output directory contains:
     - `win_rate`
     - `avg_trade_pnl`
     - optional `sharpe` when `--sharpe` is enabled
+    - resting-order stats when resting orders are enabled: `resting_orders_submitted`, `resting_orders_fully_filled`, `resting_orders_partially_filled`, `resting_orders_expired`, `resting_orders_canceled`, `total_partial_fill_events`, `average_fill_delay_ticks`, `average_filled_fraction`, `missed_trades_due_to_expiry`
 - tick log (`--log` path)
   - includes rolling stats, spike flags, confirmation status, action, position, and equity
 
