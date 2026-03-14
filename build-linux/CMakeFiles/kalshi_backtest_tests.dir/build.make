@@ -184,10 +184,24 @@ CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.s: cmake_forc
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gurshaanthukral/Kalshi-Back-testing-1/tests/test_sweep_analysis.cpp -o CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.s
 
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/flags.make
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o: /home/gurshaanthukral/Kalshi-Back-testing-1/tests/test_resting_order.cpp
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o -MF CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o.d -o CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o -c /home/gurshaanthukral/Kalshi-Back-testing-1/tests/test_resting_order.cpp
+
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/gurshaanthukral/Kalshi-Back-testing-1/tests/test_resting_order.cpp > CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.i
+
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/gurshaanthukral/Kalshi-Back-testing-1/tests/test_resting_order.cpp -o CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.s
+
 CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/flags.make
 CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o: /home/gurshaanthukral/Kalshi-Back-testing-1/src/csv_reader.cpp
 CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o -MF CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o.d -o CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o -c /home/gurshaanthukral/Kalshi-Back-testing-1/src/csv_reader.cpp
 
 CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.i: cmake_force
@@ -201,7 +215,7 @@ CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.s: cmake_force
 CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/flags.make
 CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o: /home/gurshaanthukral/Kalshi-Back-testing-1/src/engine.cpp
 CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o -MF CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o.d -o CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o -c /home/gurshaanthukral/Kalshi-Back-testing-1/src/engine.cpp
 
 CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.i: cmake_force
@@ -215,7 +229,7 @@ CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.s: cmake_force
 CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/flags.make
 CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o: /home/gurshaanthukral/Kalshi-Back-testing-1/src/execution.cpp
 CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o -MF CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o.d -o CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o -c /home/gurshaanthukral/Kalshi-Back-testing-1/src/execution.cpp
 
 CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.i: cmake_force
@@ -229,7 +243,7 @@ CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.s: cmake_force
 CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/flags.make
 CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o: /home/gurshaanthukral/Kalshi-Back-testing-1/src/sweep.cpp
 CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o -MF CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o.d -o CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o -c /home/gurshaanthukral/Kalshi-Back-testing-1/src/sweep.cpp
 
 CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.i: cmake_force
@@ -250,6 +264,7 @@ kalshi_backtest_tests_OBJECTS = \
 "CMakeFiles/kalshi_backtest_tests.dir/tests/test_execution.cpp.o" \
 "CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_grid.cpp.o" \
 "CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.o" \
+"CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o" \
 "CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o" \
 "CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o" \
 "CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o" \
@@ -266,6 +281,7 @@ kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/tests/test_max_drawd
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/tests/test_execution.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_grid.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.o
+kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o
@@ -273,7 +289,7 @@ kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/src/sweep.cpp.o
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/build.make
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/compiler_depend.ts
 kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX executable kalshi_backtest_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable kalshi_backtest_tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kalshi_backtest_tests.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

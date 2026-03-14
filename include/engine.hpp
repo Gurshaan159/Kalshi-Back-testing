@@ -21,6 +21,9 @@ struct BacktestConfig {
   bool use_quotes_for_fills{true};
   double initial_cash{10000.0};
   bool compute_sharpe{false};
+  bool enable_resting_orders{true};
+  int resting_order_lifetime_ticks{3};
+  bool allow_resting_partial_fills{true};
 };
 
 struct BacktestRunMetrics {
@@ -38,6 +41,16 @@ struct BacktestRunMetrics {
   int partial_fill_count{0};
   int requested_contracts{0};
   int filled_contracts{0};
+  int signals_generated{0};
+  int resting_orders_submitted{0};
+  int resting_orders_fully_filled{0};
+  int resting_orders_partially_filled{0};
+  int resting_orders_expired{0};
+  int resting_orders_canceled{0};
+  int total_partial_fill_events{0};
+  double average_fill_delay_ticks{0.0};
+  double average_filled_fraction{0.0};
+  int missed_trades_due_to_expiry{0};
 };
 
 struct SingleRunOutputOptions {

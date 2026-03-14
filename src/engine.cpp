@@ -4,6 +4,7 @@
 #include "execution.hpp"
 #include "metrics.hpp"
 #include "portfolio.hpp"
+#include "resting_order.hpp"
 #include "rolling_stats.hpp"
 #include "tick_logger.hpp"
 
@@ -14,6 +15,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -60,6 +62,20 @@ void EnsureParentDir(const std::string& path) {
   }
 }
 
+struct RestingMetrics {
+  int signals_generated{0};
+  int resting_orders_submitted{0};
+  int resting_orders_fully_filled{0};
+  int resting_orders_partially_filled{0};
+  int resting_orders_expired{0};
+  int resting_orders_canceled{0};
+  int total_partial_fill_events{0};
+  double average_fill_delay_ticks{0.0};
+  double average_filled_fraction{0.0};
+  int missed_trades_due_to_expiry{0};
+  bool enabled{false};
+};
+
 bool WriteMetricsJson(const std::string& path,
                       double total_return,
                       double max_drawdown,
@@ -68,6 +84,7 @@ bool WriteMetricsJson(const std::string& path,
                       double avg_trade_pnl,
                       bool include_sharpe,
                       double sharpe_value,
+                      const RestingMetrics* resting,
                       std::string* error) {
   EnsureParentDir(path);
   std::ofstream out(path, std::ios::out | std::ios::trunc);
@@ -85,11 +102,21 @@ bool WriteMetricsJson(const std::string& path,
   out << "  \"win_rate\": " << win_rate << ",\n";
   out << "  \"avg_trade_pnl\": " << avg_trade_pnl;
   if (include_sharpe) {
-    out << ",\n  \"sharpe\": " << sharpe_value << "\n";
-  } else {
-    out << "\n";
+    out << ",\n  \"sharpe\": " << sharpe_value;
   }
-  out << "}\n";
+  if (resting != nullptr && resting->enabled) {
+    out << ",\n  \"signals_generated\": " << resting->signals_generated
+        << ",\n  \"resting_orders_submitted\": " << resting->resting_orders_submitted
+        << ",\n  \"resting_orders_fully_filled\": " << resting->resting_orders_fully_filled
+        << ",\n  \"resting_orders_partially_filled\": " << resting->resting_orders_partially_filled
+        << ",\n  \"resting_orders_expired\": " << resting->resting_orders_expired
+        << ",\n  \"resting_orders_canceled\": " << resting->resting_orders_canceled
+        << ",\n  \"total_partial_fill_events\": " << resting->total_partial_fill_events
+        << ",\n  \"average_fill_delay_ticks\": " << resting->average_fill_delay_ticks
+        << ",\n  \"average_filled_fraction\": " << resting->average_filled_fraction
+        << ",\n  \"missed_trades_due_to_expiry\": " << resting->missed_trades_due_to_expiry;
+  }
+  out << "\n}\n";
   return true;
 }
 
@@ -194,6 +221,25 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
   int requested_contracts = 0;
   int filled_contracts = 0;
 
+  int signals_generated = 0;
+  int resting_orders_submitted = 0;
+  int resting_orders_fully_filled = 0;
+  int resting_orders_partially_filled = 0;
+  int resting_orders_expired = 0;
+  int resting_orders_canceled = 0;
+  int total_partial_fill_events = 0;
+  int fill_delay_ticks_sum = 0;
+  int fill_event_count = 0;
+  double filled_fraction_sum = 0.0;
+  int filled_fraction_count = 0;
+  int missed_trades_due_to_expiry = 0;
+
+  std::vector<RestingOrder> active_orders;
+  int order_id_counter = 0;
+
+  const bool use_resting =
+      config.enable_resting_orders && config.resting_order_lifetime_ticks > 0;
+
   auto ApplyAndRecordFill = [&](const Tick& tick, const std::string& action_name, int qty_signed) {
     ++fill_attempts;
     requested_contracts += std::abs(qty_signed);
@@ -218,40 +264,154 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
     return true;
   };
 
+  auto HasActiveEntryOrder = [&]() {
+    for (const auto& o : active_orders) {
+      if (o.intent == RestingOrderIntent::Entry) return true;
+    }
+    return false;
+  };
+
   CsvReadStats csv_stats;
   std::string csv_error;
   const bool ok = StreamTicksFromCsv(
       config.csv_path,
       [&](const Tick& tick) {
         ++tick_index;
+
+        // 1. Update strategy state: capture stats before adding current tick (for spike detection)
         const bool ready_before = stats.IsReady();
         const double mean_before = stats.Mean();
         const double std_before = stats.StdDev();
+        stats.Update(tick.price);
 
+        // Expire candidate if past confirmation window
+        if (candidate.active && tick_index > candidate.tick_index + 1U) {
+          candidate.active = false;
+        }
+
+        // 2. Process active resting orders (before new signals)
+        bool entered_this_tick = false;
+        auto it = active_orders.begin();
+        while (it != active_orders.end()) {
+          RestingOrder& order = *it;
+          if (tick_index > order.expiry_tick_index) {
+            if (order.remaining_qty_signed != 0) {
+              ++resting_orders_expired;
+              ++resting_orders_canceled;
+              if (order.intent == RestingOrderIntent::Entry) {
+                ++missed_trades_due_to_expiry;
+              }
+            }
+            it = active_orders.erase(it);
+            continue;
+          }
+
+          const OrderRequest req{tick.timestamp, order.action, order.remaining_qty_signed};
+          BacktestConfig exec_cfg = config;
+          if (!config.allow_resting_partial_fills) {
+            exec_cfg.allow_partial_fills = false;
+          }
+          ++fill_attempts;
+          const ExecutionResult exec = SimulateFill(tick, req, exec_cfg);
+
+          if (exec.did_fill) {
+            filled_contracts += std::abs(exec.filled_qty_signed);
+            if (exec.was_partial) {
+              ++partial_fill_count;
+              ++total_partial_fill_events;
+            }
+
+            TradeRecord tr;
+            portfolio.ApplyFill(req.timestamp, req.action, exec.filled_qty_signed, exec.fill_price,
+                               config.fee_per_contract, &tr);
+            if (output_options.write_outputs) {
+              trades_csv << tr.timestamp << "," << tr.action << "," << tr.qty << "," << std::fixed
+                         << std::setprecision(6) << tr.price << "," << tr.pnl << "\n";
+            }
+            round_trips.Update(tr);
+
+            const int delay = static_cast<int>(tick_index - order.submit_tick_index);
+            order.fill_delay_ticks_sum += delay;
+            order.fill_event_count += 1;
+            order.cumulative_filled_qty += static_cast<double>(std::abs(exec.filled_qty_signed));
+            order.avg_fill_price =
+                (order.avg_fill_price * (order.fill_event_count - 1) + exec.fill_price) /
+                static_cast<double>(order.fill_event_count);
+            order.remaining_qty_signed -= exec.filled_qty_signed;
+
+            fill_delay_ticks_sum += delay;
+            ++fill_event_count;
+            filled_fraction_sum +=
+                static_cast<double>(std::abs(exec.filled_qty_signed)) /
+                static_cast<double>(std::abs(order.desired_qty_signed));
+            ++filled_fraction_count;
+
+            if (order.remaining_qty_signed == 0) {
+              ++resting_orders_fully_filled;
+              if (order.intent == RestingOrderIntent::Entry) {
+                entered_this_tick = true;
+                position_plan.initial_qty = std::abs(portfolio.PositionQty());
+                position_plan.stage_index = 0;
+                ticks_in_position = 0;
+              }
+              it = active_orders.erase(it);
+              continue;
+            }
+            order.status = RestingOrderStatus::PartiallyFilled;
+            ++resting_orders_partially_filled;
+            if (order.intent == RestingOrderIntent::Entry && std::abs(portfolio.PositionQty()) > 0) {
+              entered_this_tick = true;
+              position_plan.initial_qty = std::abs(portfolio.PositionQty());
+              position_plan.stage_index = 0;
+              ticks_in_position = 0;
+            }
+          } else {
+            ++fill_rejections;
+          }
+          ++it;
+        }
+
+        // 3. Strategy decision logic
         SpikeKind spike_flag = SpikeKind::kNone;
         std::string confirm_status = "na";
         std::string action = "none";
-        bool entered_this_tick = false;
 
         if (candidate.active && tick_index == candidate.tick_index + 1U) {
           const bool confirmed =
               (candidate.kind == SpikeKind::kUp && tick.price < candidate.spike_price) ||
               (candidate.kind == SpikeKind::kDown && tick.price > candidate.spike_price);
           confirm_status = confirmed ? "confirmed" : "rejected";
-          if (confirmed && portfolio.PositionQty() == 0) {
+          if (confirmed && portfolio.PositionQty() == 0 && !HasActiveEntryOrder()) {
             const int entry_qty = candidate.kind == SpikeKind::kUp ? -config.position_size : config.position_size;
-            if (ApplyAndRecordFill(tick, "entry", entry_qty)) {
-              position_plan.initial_qty = std::abs(portfolio.PositionQty());
-              position_plan.stage_index = 0;
-              ticks_in_position = 0;
+            ++signals_generated;
+            if (use_resting) {
+              std::ostringstream oss;
+              oss << "ro-" << (++order_id_counter);
+              RestingOrder ro;
+              ro.order_id = oss.str();
+              ro.intent = RestingOrderIntent::Entry;
+              ro.action = "entry";
+              ro.desired_qty_signed = entry_qty;
+              ro.remaining_qty_signed = entry_qty;
+              ro.submit_tick_index = tick_index;
+              ro.expiry_tick_index = tick_index + static_cast<std::size_t>(config.resting_order_lifetime_ticks);
+              ro.submit_timestamp = tick.timestamp;
+              ro.status = RestingOrderStatus::Active;
+              active_orders.push_back(ro);
+              ++resting_orders_submitted;
+              requested_contracts += std::abs(entry_qty);
               action = "enter";
-              entered_this_tick = true;
+            } else {
+              if (ApplyAndRecordFill(tick, "entry", entry_qty)) {
+                position_plan.initial_qty = std::abs(portfolio.PositionQty());
+                position_plan.stage_index = 0;
+                ticks_in_position = 0;
+                action = "enter";
+                entered_this_tick = true;
+              }
             }
           }
           candidate.active = false;
-        } else if (candidate.active && tick_index > candidate.tick_index + 1U) {
-          candidate.active = false;
-          confirm_status = "expired";
         }
 
         if (!candidate.active && portfolio.PositionQty() == 0 && ready_before && std_before > 0.0) {
@@ -276,7 +436,7 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
                                                  : (portfolio.AverageEntryPrice() - tick.price);
           const double adverse_move = -favorable_move;
 
-          // Gradual exit: 3 chunks at configured thresholds.
+          // Gradual exit (immediate fill for Phase 1)
           if (position_plan.stage_index < static_cast<int>(position_plan.thresholds.size())) {
             const double threshold = position_plan.thresholds[static_cast<std::size_t>(position_plan.stage_index)];
             if (favorable_move >= threshold) {
@@ -300,7 +460,6 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
             }
           }
 
-          // Stop-loss.
           if (portfolio.PositionQty() != 0 && adverse_move >= config.stop_loss_points) {
             const int signed_exit = -portfolio.PositionQty();
             if (ApplyAndRecordFill(tick, "stop_loss", signed_exit)) {
@@ -308,7 +467,6 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
             }
           }
 
-          // Max hold.
           if (portfolio.PositionQty() != 0 && ticks_in_position >= config.max_hold_ticks) {
             const int signed_exit = -portfolio.PositionQty();
             if (ApplyAndRecordFill(tick, "max_hold", signed_exit)) {
@@ -323,7 +481,7 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
           }
         }
 
-        stats.Update(tick.price);
+        // 4. Advance to next tick: equity, drawdown, logging
         const double unrealized = portfolio.UnrealizedPnl(tick.price);
         const double equity = portfolio.Equity(tick.price);
         drawdown.Update(equity);
@@ -356,11 +514,30 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
   const double avg_trade_pnl = trade_count > 0 ? rt.total_pnl / static_cast<double>(trade_count) : 0.0;
   const double total_pnl = final_equity - config.initial_cash;
 
+  RestingMetrics resting_metrics;
+  if (use_resting) {
+    resting_metrics.enabled = true;
+    resting_metrics.signals_generated = signals_generated;
+    resting_metrics.resting_orders_submitted = resting_orders_submitted;
+    resting_metrics.resting_orders_fully_filled = resting_orders_fully_filled;
+    resting_metrics.resting_orders_partially_filled = resting_orders_partially_filled;
+    resting_metrics.resting_orders_expired = resting_orders_expired;
+    resting_metrics.resting_orders_canceled = resting_orders_canceled;
+    resting_metrics.total_partial_fill_events = total_partial_fill_events;
+    resting_metrics.average_fill_delay_ticks =
+        fill_event_count > 0 ? static_cast<double>(fill_delay_ticks_sum) / static_cast<double>(fill_event_count)
+                            : 0.0;
+    resting_metrics.average_filled_fraction =
+        filled_fraction_count > 0 ? filled_fraction_sum / static_cast<double>(filled_fraction_count) : 0.0;
+    resting_metrics.missed_trades_due_to_expiry = missed_trades_due_to_expiry;
+  }
+
   if (output_options.write_outputs) {
     std::string metrics_error;
-    const bool metrics_ok = WriteMetricsJson((fs::path(config.outdir) / "metrics.json").string(), total_return,
-                                             drawdown.MaxDrawdown(), trade_count, win_rate, avg_trade_pnl,
-                                             config.compute_sharpe, sharpe.Sharpe(), &metrics_error);
+    const bool metrics_ok = WriteMetricsJson(
+        (fs::path(config.outdir) / "metrics.json").string(), total_return, drawdown.MaxDrawdown(), trade_count,
+        win_rate, avg_trade_pnl, config.compute_sharpe, sharpe.Sharpe(),
+        use_resting ? &resting_metrics : nullptr, &metrics_error);
     if (!metrics_ok) {
       return Fail(metrics_error);
     }
@@ -382,6 +559,19 @@ BacktestRunResult RunSingleBacktest(const BacktestConfig& config,
   result.metrics.partial_fill_count = partial_fill_count;
   result.metrics.requested_contracts = requested_contracts;
   result.metrics.filled_contracts = filled_contracts;
+  result.metrics.signals_generated = signals_generated;
+  result.metrics.resting_orders_submitted = resting_orders_submitted;
+  result.metrics.resting_orders_fully_filled = resting_orders_fully_filled;
+  result.metrics.resting_orders_partially_filled = resting_orders_partially_filled;
+  result.metrics.resting_orders_expired = resting_orders_expired;
+  result.metrics.resting_orders_canceled = resting_orders_canceled;
+  result.metrics.total_partial_fill_events = total_partial_fill_events;
+  result.metrics.average_fill_delay_ticks =
+      fill_event_count > 0 ? static_cast<double>(fill_delay_ticks_sum) / static_cast<double>(fill_event_count)
+                          : 0.0;
+  result.metrics.average_filled_fraction =
+      filled_fraction_count > 0 ? filled_fraction_sum / static_cast<double>(filled_fraction_count) : 0.0;
+  result.metrics.missed_trades_due_to_expiry = missed_trades_due_to_expiry;
   SetDuration();
 
   if (output_options.print_summary) {

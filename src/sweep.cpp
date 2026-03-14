@@ -170,7 +170,17 @@ bool WriteRunResultJson(const std::string& path, const BacktestRunResult& run, s
   out << "    \"fill_rejections\": " << run.metrics.fill_rejections << ",\n";
   out << "    \"partial_fill_count\": " << run.metrics.partial_fill_count << ",\n";
   out << "    \"requested_contracts\": " << run.metrics.requested_contracts << ",\n";
-  out << "    \"filled_contracts\": " << run.metrics.filled_contracts << "\n";
+  out << "    \"filled_contracts\": " << run.metrics.filled_contracts << ",\n";
+  out << "    \"signals_generated\": " << run.metrics.signals_generated << ",\n";
+  out << "    \"resting_orders_submitted\": " << run.metrics.resting_orders_submitted << ",\n";
+  out << "    \"resting_orders_fully_filled\": " << run.metrics.resting_orders_fully_filled << ",\n";
+  out << "    \"resting_orders_partially_filled\": " << run.metrics.resting_orders_partially_filled << ",\n";
+  out << "    \"resting_orders_expired\": " << run.metrics.resting_orders_expired << ",\n";
+  out << "    \"resting_orders_canceled\": " << run.metrics.resting_orders_canceled << ",\n";
+  out << "    \"total_partial_fill_events\": " << run.metrics.total_partial_fill_events << ",\n";
+  out << "    \"average_fill_delay_ticks\": " << run.metrics.average_fill_delay_ticks << ",\n";
+  out << "    \"average_filled_fraction\": " << run.metrics.average_filled_fraction << ",\n";
+  out << "    \"missed_trades_due_to_expiry\": " << run.metrics.missed_trades_due_to_expiry << "\n";
   out << "  },\n";
   out << "  \"csv_stats\": {\n";
   out << "    \"rows_total\": " << run.csv_stats.rows_total << ",\n";

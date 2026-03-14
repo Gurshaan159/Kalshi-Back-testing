@@ -428,6 +428,30 @@ tests/test_portfolio.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/tests/test_portfolio.cpp.s
 .PHONY : tests/test_portfolio.cpp.s
 
+tests/test_resting_order.o: tests/test_resting_order.cpp.o
+.PHONY : tests/test_resting_order.o
+
+# target to build an object file
+tests/test_resting_order.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o
+.PHONY : tests/test_resting_order.cpp.o
+
+tests/test_resting_order.i: tests/test_resting_order.cpp.i
+.PHONY : tests/test_resting_order.i
+
+# target to preprocess a source file
+tests/test_resting_order.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.i
+.PHONY : tests/test_resting_order.cpp.i
+
+tests/test_resting_order.s: tests/test_resting_order.cpp.s
+.PHONY : tests/test_resting_order.s
+
+# target to generate assembly for a file
+tests/test_resting_order.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.s
+.PHONY : tests/test_resting_order.cpp.s
+
 tests/test_rolling_stats.o: tests/test_rolling_stats.cpp.o
 .PHONY : tests/test_rolling_stats.o
 
@@ -568,6 +592,9 @@ help:
 	@echo "... tests/test_portfolio.o"
 	@echo "... tests/test_portfolio.i"
 	@echo "... tests/test_portfolio.s"
+	@echo "... tests/test_resting_order.o"
+	@echo "... tests/test_resting_order.i"
+	@echo "... tests/test_resting_order.s"
 	@echo "... tests/test_rolling_stats.o"
 	@echo "... tests/test_rolling_stats.i"
 	@echo "... tests/test_rolling_stats.s"

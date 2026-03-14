@@ -120,12 +120,12 @@ CMakeFiles/kalshi_backtest.dir/clean:
 CMakeFiles/kalshi_backtest_tests.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19,20,21 "Built target kalshi_backtest_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19,20,21,22 "Built target kalshi_backtest_tests"
 .PHONY : CMakeFiles/kalshi_backtest_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/kalshi_backtest_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles 13
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kalshi_backtest_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/kalshi_backtest_tests.dir/rule
@@ -137,7 +137,7 @@ kalshi_backtest_tests: CMakeFiles/kalshi_backtest_tests.dir/rule
 # codegen rule for target.
 CMakeFiles/kalshi_backtest_tests.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kalshi_backtest_tests.dir/build.make CMakeFiles/kalshi_backtest_tests.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19,20,21 "Finished codegen for target kalshi_backtest_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19,20,21,22 "Finished codegen for target kalshi_backtest_tests"
 .PHONY : CMakeFiles/kalshi_backtest_tests.dir/codegen
 
 # clean rule for target.

@@ -10,6 +10,7 @@ kalshi_backtest_tests: \
   CMakeFiles/kalshi_backtest_tests.dir/tests/test_execution.cpp.o \
   CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_grid.cpp.o \
   CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.o \
+  CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o \
   CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o \
   CMakeFiles/kalshi_backtest_tests.dir/src/engine.cpp.o \
   CMakeFiles/kalshi_backtest_tests.dir/src/execution.cpp.o \
@@ -63,6 +64,8 @@ CMakeFiles/kalshi_backtest_tests.dir/tests/test_execution.cpp.o:
 CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_grid.cpp.o:
 
 CMakeFiles/kalshi_backtest_tests.dir/tests/test_sweep_analysis.cpp.o:
+
+CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o:
 
 CMakeFiles/kalshi_backtest_tests.dir/src/csv_reader.cpp.o:
 

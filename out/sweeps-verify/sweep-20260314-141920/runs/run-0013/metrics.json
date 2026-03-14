@@ -1,0 +1,18 @@
+{
+  "total_return": -0.038400,
+  "max_drawdown": 0.047440,
+  "trade_count": 67,
+  "win_rate": 0.149254,
+  "avg_trade_pnl": -5.731343,
+  "sharpe": -0.003967,
+  "signals_generated": 214,
+  "resting_orders_submitted": 214,
+  "resting_orders_fully_filled": 58,
+  "resting_orders_partially_filled": 11,
+  "resting_orders_expired": 156,
+  "resting_orders_canceled": 156,
+  "total_partial_fill_events": 11,
+  "average_fill_delay_ticks": 1.724638,
+  "average_filled_fraction": 0.905797,
+  "missed_trades_due_to_expiry": 156
+}

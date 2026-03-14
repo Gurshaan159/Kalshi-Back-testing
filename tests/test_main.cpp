@@ -15,6 +15,11 @@ bool TestSweepGridFilterBehavior();
 bool TestSweepRankingLogic();
 bool TestSweepSensitivityAggregation();
 bool TestSweepInteractionAggregation();
+bool TestRestingOrderLifecycle();
+bool TestPartialFillsOverTime();
+bool TestExpiryBehavior();
+bool TestImmediateFillCompatibility();
+bool TestRestingOrderMetrics();
 
 int main() {
   if (!TestRollingStats()) {
@@ -60,6 +65,21 @@ int main() {
     return 1;
   }
   if (!TestSweepInteractionAggregation()) {
+    return 1;
+  }
+  if (!TestRestingOrderLifecycle()) {
+    return 1;
+  }
+  if (!TestPartialFillsOverTime()) {
+    return 1;
+  }
+  if (!TestExpiryBehavior()) {
+    return 1;
+  }
+  if (!TestImmediateFillCompatibility()) {
+    return 1;
+  }
+  if (!TestRestingOrderMetrics()) {
     return 1;
   }
   std::cout << "All tests passed\n";

@@ -50,6 +50,7 @@ add_executable(kalshi_backtest_tests
   tests/test_execution.cpp
   tests/test_sweep_grid.cpp
   tests/test_sweep_analysis.cpp
+  tests/test_resting_order.cpp
   src/csv_reader.cpp
   src/engine.cpp
   src/execution.cpp
@@ -68,4 +69,5 @@ else()
     -Wdouble-promotion
   )
 endif()
-add_test(NAME kalshi_backtest_tests COMMAND kalshi_backtest_tests)
+add_test(NAME kalshi_backtest_tests COMMAND kalshi_backtest_tests
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

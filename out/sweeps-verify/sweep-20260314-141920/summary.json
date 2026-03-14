@@ -1,0 +1,11 @@
+{
+  "sweep_id": "sweep-20260314-141920",
+  "total_generated": 108,
+  "total_filtered_out": 0,
+  "total_executed": 108,
+  "concurrency_used": 2,
+  "success_runs": 108,
+  "failed_runs": 0,
+  "top_sharpe_run_id": "run-0088",
+  "top_pnl_run_id": "run-0088"
+}

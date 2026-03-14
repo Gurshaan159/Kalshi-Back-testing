@@ -1,0 +1,42 @@
+{
+  "run_id": "run-0012",
+  "status": "ok",
+  "error": "",
+  "duration_ms": 1308,
+  "params": {
+    "spike_threshold": 2.000000,
+    "position_size": 2,
+    "stop_loss_points": 1.500000,
+    "max_hold_ticks": 150
+  },
+  "metrics": {
+    "final_equity": 8191.600000,
+    "total_pnl": -1808.400000,
+    "total_return": -0.180840,
+    "trade_count": 670,
+    "win_rate": 0.105970,
+    "avg_trade_pnl": -2.699104,
+    "max_drawdown": 0.180840,
+    "sharpe": -0.002389,
+    "fill_attempts": 11348,
+    "fill_rejections": 9869,
+    "partial_fill_count": 95,
+    "requested_contracts": 10682,
+    "filled_contracts": 2504,
+    "signals_generated": 2538,
+    "resting_orders_submitted": 2538,
+    "resting_orders_fully_filled": 588,
+    "resting_orders_partially_filled": 88,
+    "resting_orders_expired": 1950,
+    "resting_orders_canceled": 1950,
+    "total_partial_fill_events": 88,
+    "average_fill_delay_ticks": 1.797337,
+    "average_filled_fraction": 0.926036,
+    "missed_trades_due_to_expiry": 1950
+  },
+  "csv_stats": {
+    "rows_total": 100000,
+    "rows_emitted": 100000,
+    "rows_skipped": 0
+  }
+}

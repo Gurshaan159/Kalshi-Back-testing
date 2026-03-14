@@ -16,6 +16,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_max_drawdown.cpp.o.d"
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_portfolio.cpp.o"
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_portfolio.cpp.o.d"
+  "CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o"
+  "CMakeFiles/kalshi_backtest_tests.dir/tests/test_resting_order.cpp.o.d"
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_rolling_stats.cpp.o"
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_rolling_stats.cpp.o.d"
   "CMakeFiles/kalshi_backtest_tests.dir/tests/test_spike_detection.cpp.o"

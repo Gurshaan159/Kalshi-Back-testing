@@ -39,6 +39,9 @@ void PrintHelp() {
       << "  --start-ts <unix>          Fetch start timestamp (seconds)\n"
       << "  --end-ts <unix>            Fetch end timestamp (seconds)\n"
       << "  --period <int>             Candle interval minutes (default: 1)\n"
+      << "  --resting-order-lifetime <int>  Ticks a resting order stays active (default: 3)\n"
+      << "  --no-resting-partials      Disable partial fills for resting orders\n"
+      << "  --disable-resting-orders  Use immediate fill (legacy behavior)\n"
       << "  --help                     Show this message\n"
       << "\n"
       << "Example:\n"
@@ -121,9 +124,20 @@ bool ApplyBacktestOptions(const std::unordered_map<std::string, std::string>& kv
     *error = "Invalid --initial-cash";
     return false;
   }
+  if (kv.find("--resting-order-lifetime") != kv.end() &&
+      !ParseInt(kv.at("--resting-order-lifetime"), &config->resting_order_lifetime_ticks)) {
+    *error = "Invalid --resting-order-lifetime";
+    return false;
+  }
+  if (kv.find("--no-resting-partials") != kv.end()) {
+    config->allow_resting_partial_fills = false;
+  }
+  if (kv.find("--disable-resting-orders") != kv.end()) {
+    config->enable_resting_orders = false;
+  }
   if (config->rolling_window <= 1 || config->position_size <= 0 || config->max_hold_ticks <= 0 ||
       config->spike_threshold <= 0.0 || config->stop_loss_points <= 0.0 || config->fee_per_contract < 0.0 ||
-      config->slippage_points < 0.0) {
+      config->slippage_points < 0.0 || config->resting_order_lifetime_ticks < 0) {
     *error = "One or more options are out of valid range";
     return false;
   }
@@ -234,6 +248,16 @@ int RunCli(int argc, char** argv) {
         ++i;
         continue;
       }
+      if (key == "--no-resting-partials") {
+        kv["--no-resting-partials"] = "1";
+        ++i;
+        continue;
+      }
+      if (key == "--disable-resting-orders") {
+        kv["--disable-resting-orders"] = "1";
+        ++i;
+        continue;
+      }
       if (i + 1 >= argc) {
         std::cerr << "Missing value after " << key << "\n";
         return 1;
@@ -297,6 +321,16 @@ int RunCli(int argc, char** argv) {
     const std::string key = argv[i];
     if (key == "--sharpe") {
       want_sharpe = true;
+      ++i;
+      continue;
+    }
+    if (key == "--no-resting-partials") {
+      kv["--no-resting-partials"] = "1";
+      ++i;
+      continue;
+    }
+    if (key == "--disable-resting-orders") {
+      kv["--disable-resting-orders"] = "1";
       ++i;
       continue;
     }

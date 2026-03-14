@@ -1,10 +1,10 @@
-Start testing: Mar 13 17:29 EST
+Start testing: Mar 14 14:19 EST
 ----------------------------------------------------------
 1/1 Testing: kalshi_backtest_tests
 1/1 Test: kalshi_backtest_tests
 Command: "/home/gurshaanthukral/Kalshi-Back-testing-1/build-linux/kalshi_backtest_tests"
-Directory: /home/gurshaanthukral/Kalshi-Back-testing-1/build-linux
-"kalshi_backtest_tests" start time: Mar 13 17:29 EST
+Directory: /home/gurshaanthukral/Kalshi-Back-testing-1
+"kalshi_backtest_tests" start time: Mar 14 14:19 EST
 Output:
 ----------------------------------------------------------
 All tests passed
@@ -12,8 +12,8 @@ All tests passed
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"kalshi_backtest_tests" end time: Mar 13 17:29 EST
+"kalshi_backtest_tests" end time: Mar 14 14:19 EST
 "kalshi_backtest_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Mar 13 17:29 EST
+End testing: Mar 14 14:19 EST
